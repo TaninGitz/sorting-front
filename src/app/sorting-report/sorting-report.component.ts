@@ -169,6 +169,7 @@ export class SortingReportComponent implements OnInit {
     return `${day}/${month}/${year} ${hours}:${minutes}`;
   }
   
+  //test
   getLevelFromToken() {
     const token = localStorage.getItem('sorting_token');
     if (token) {
