@@ -1,0 +1,252 @@
+<div class="dashboard-wrapper">
+  <h2 class="page-title">Sorting Dashboard</h2>
+
+  <div class="filter-container">
+    <div class="filter-group">
+      <span class="filter-label"><i class="far fa-calendar-alt me-1"></i> From:</span>
+      <input type="date" class="form-control-custom" [(ngModel)]="startDate" (change)="onFilterChange()" />
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">To:</span>
+      <input type="date" class="form-control-custom" [(ngModel)]="endDate" (change)="onFilterChange()" />
+    </div>
+
+    <div class="filter-group flex-grow-1">
+      <span class="filter-label"><i class="fas fa-layer-group me-1"></i> Group:</span>
+      <select class="form-control-custom w-100" [(ngModel)]="selectedGroup" (change)="onFilterChange()">
+        <option value="">-- All Groups --</option>
+        @for (grp of groupList; track grp) {
+          <option [value]="grp">{{ grp }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group flex-grow-1">
+      <span class="filter-label"><i class="fas fa-sitemap me-1"></i> Section:</span>
+      <div class="dropdown w-100">
+        <button class="btn form-control-custom w-100 text-start d-flex justify-content-between align-items-center" 
+          type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" style="background-color: #fff;">
+          <span class="text-truncate">{{ getSelectedSectionText() }}</span>
+          <i class="fas fa-chevron-down text-muted" style="font-size: 0.8rem;"></i>
+        </button>
+        <ul class="dropdown-menu w-100 shadow p-2" style="max-height: 250px; overflow-y: auto;">
+          @if (sectionList.length === 0) { <li class="text-muted text-center py-2"><small>No data</small></li> }
+          @for (sec of sectionList; track sec) {
+            <li>
+              <div class="form-check m-1">
+                <input class="form-check-input" type="checkbox" [id]="'sec_' + sec" [value]="sec" [checked]="selectedSections.includes(sec)" (change)="onSectionCheckboxChange($event, sec)">
+                <label class="form-check-label w-100" style="cursor: pointer;" [for]="'sec_' + sec">{{ sec }}</label>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="filter-group flex-grow-1">
+      <span class="filter-label"><i class="fas fa-cube me-1"></i> Item:</span>
+      <select class="form-control-custom w-100" [(ngModel)]="selectedItemNo" (change)="onFilterChange()">
+        <option value="">-- All Items --</option>
+        @for (item of itemList; track item.itemNo) {
+          <option [value]="item.itemNo">{{ item.itemNo }} - {{ item.itemName }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group flex-grow-1">
+      <span class="filter-label"><i class="fas fa-users me-1"></i> Emp:</span>
+      <select class="form-control-custom w-100" [(ngModel)]="selectedEmpNo" (change)="onFilterChange()">
+        <option value="">-- All Employees --</option>
+        @for (emp of empList; track emp.id) {
+          <option [value]="emp.empNo">{{ emp.empNo }} - {{ emp.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group d-flex align-items-end">
+      <button class="btn btn-warning w-100" (click)="clearFilters()" style="height: 38px;" title="ล้างค่า Dropdown">
+        <i class="fas fa-eraser me-1"></i> Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-xl-4 col-md-6">
+      <div class="custom-card stat-card border-left-primary h-100">
+        <div class="card-body">
+          <div class="stat-label text-primary">Total Input</div>
+          <div class="d-flex align-items-baseline">
+            <div class="stat-value">{{ summary.totalInput | number }}</div>
+            <div class="stat-unit">pcs</div>
+          </div>
+          <i class="fas fa-boxes stat-icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+      <div class="custom-card stat-card border-left-success h-100">
+        <div class="card-body">
+          <div class="stat-label text-success">Total OK Output</div>
+          <div class="d-flex align-items-baseline">
+            <div class="stat-value">{{ summary.totalOK | number }}</div>
+            <div class="stat-unit">pcs</div>
+          </div>
+          <i class="fas fa-check-circle stat-icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+      <div class="custom-card stat-card border-left-danger h-100">
+        <div class="card-body">
+          <div class="stat-label text-danger">Total NG Output</div>
+          <div class="d-flex align-items-baseline">
+            <div class="stat-value">{{ summary.totalNG | number }}</div>
+            <div class="stat-unit">pcs</div>
+          </div>
+          <i class="fas fa-times-circle stat-icon"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="custom-card mb-4">
+    <div class="card-body">
+      <h5 class="card-title text-gray-1000 mb-4 font-weight-bold">Daily Production Overview</h5>
+      <div class="chart-container"><canvas id="sortingChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-5">
+      <div class="custom-card h-100">
+        <div class="card-body">
+          <h5 class="card-title text-gray-1000 mb-4 font-weight-bold">Total Input by Group</h5>
+          <div style="height: 350px; border-radius: 0.75rem 0.75rem 0 0;">
+            <canvas class="chart-container" id="groupChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="custom-card h-100">
+        <div class="card-body p-0">
+          <div class="p-3 border-bottom bg-light" style="border-radius: 0.75rem 0.75rem 0 0;">
+            <h5 class="m-0 font-weight-bold text-primary">Group Output Summary</h5>
+          </div>
+          <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+            <table class="table table-hover table-striped mb-0 text-center align-middle">
+              <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                <tr>
+                  <th class="text-start px-4">Group Name</th>
+                  <th class="text-end">Input</th>
+                  <th class="text-end text-success">OK</th>
+                  <th class="text-end text-danger">NG</th>
+                  <th class="text-end">% Yield</th>
+                  <th class="text-center">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (groupTableData.length === 0) { <tr><td colspan="6" class="text-muted py-4">No data available</td></tr> }
+                @for (grp of groupTableData; track grp.groupName) {
+                  <tr>
+                    <td class="text-start px-4 fw-bold">{{ grp.groupName }}</td>
+                    <td class="text-end">{{ grp.input | number }}</td>
+                    <td class="text-end text-success fw-bold">{{ grp.ok | number }}</td>
+                    <td class="text-end text-danger fw-bold">{{ grp.ng | number }}</td>
+                    <td class="text-end">
+                      <span class="badge" [ngClass]="grp.yieldPercent >= 95 ? 'bg-success' : (grp.yieldPercent >= 80 ? 'bg-warning text-dark' : 'bg-danger')">
+                        {{ grp.yieldPercent }} %
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <button class="btn btn-info btn-sm text-white" (click)="openGroupDetail(grp)" title="ดูรายละเอียดแยก Model">
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-my-modal modalId="modalGroupDetail" title="รายละเอียด %Yield แยกตาม Model" modalSize="modal-xl">
+  @if (selectedGroupDetails) {
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+      <h6 class="fw-bold text-primary mb-0">
+        <i class="fas fa-layer-group me-2"></i> Group: {{ selectedGroupDetails.groupName }}
+      </h6>
+      <span class="badge bg-info text-dark" style="font-size: 0.9rem;">
+        <i class="fas fa-cubes me-1"></i> Total Items: {{ selectedGroupDetails.itemDetails.length }}
+      </span>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="text-start" style="width: 15%;">Item No</th>
+            <th class="text-start" style="width: 20%;">Item Name</th>
+            <th class="text-end" style="width: 10%;">Input</th>
+            <th class="text-end text-success" style="width: 10%;">OK</th>
+            <th class="text-end text-danger" style="width: 10%;">NG</th>
+            <th class="text-end" style="width: 10%;">% Yield</th>
+            <th class="text-start" style="width: 25%;">NG Breakdown</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of selectedGroupDetails.itemDetails; track item.itemNo) {
+            <tr>
+              <td class="text-start fw-bold">{{ item.itemNo }}</td>
+              <td class="text-start text-muted">{{ item.itemName }}</td>
+              <td class="text-end">{{ item.input | number }}</td>
+              <td class="text-end text-success">{{ item.ok | number }}</td>
+              <td class="text-end text-danger fw-bold">{{ item.ng | number }}</td>
+              <td class="text-end">
+                <span class="badge" [ngClass]="item.yieldPercent >= 95 ? 'bg-success' : (item.yieldPercent >= 80 ? 'bg-warning text-dark' : 'bg-danger')">
+                  {{ item.yieldPercent }} %
+                </span>
+              </td>
+              <td class="text-start">
+                @if (item.defects && item.defects.length > 0) {
+                  <div class="d-flex flex-wrap gap-1">
+                    @for (def of item.defects; track def.name) {
+                      <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
+                        {{ def.name }}: {{ def.qty | number }}
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+        
+        <tfoot class="table-light fw-bold" style="border-top: 2px solid #dee2e6;">
+          <tr>
+            <td colspan="2" class="text-end">ยอดรวมทั้งหมดของ Group (Total):</td>
+            <td class="text-end text-primary fs-6">{{ selectedGroupDetails.input | number }}</td>
+            <td class="text-end text-success fs-6">{{ selectedGroupDetails.ok | number }}</td>
+            <td class="text-end text-danger fs-6">{{ selectedGroupDetails.ng | number }}</td>
+            <td class="text-end">
+              <span class="badge" 
+                    [ngClass]="selectedGroupDetails.yieldPercent >= 95 ? 'bg-success' : (selectedGroupDetails.yieldPercent >= 80 ? 'bg-warning text-dark' : 'bg-danger')"
+                    style="font-size: 0.95rem;">
+                {{ selectedGroupDetails.yieldPercent }} %
+              </span>
+            </td>
+            <td class="text-start text-muted" style="font-size: 0.85rem;">* สรุป NG รวมแยกตาม Model ด้านบน</td>
+
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  }
+</app-my-modal>

@@ -1,0 +1,161 @@
+<div class="dashboard-wrapper">
+    <h2 class="page-title mb-4">Employee Performance Report</h2>
+  
+    <div class="filter-container mb-4 p-3 bg-white rounded shadow-sm d-flex flex-wrap gap-3 align-items-end">
+      <div class="filter-group">
+        <label class="form-label small text-muted mb-1">From Date</label>
+        <input type="date" class="form-control" [(ngModel)]="startDate" (change)="onFilterChange()" />
+      </div>
+      <div class="filter-group">
+        <label class="form-label small text-muted mb-1">To Date</label>
+        <input type="date" class="form-control" [(ngModel)]="endDate" (change)="onFilterChange()" />
+      </div>
+      <div class="filter-group flex-grow-1">
+        <label class="form-label small text-muted mb-1">Section</label>
+        <select class="form-select" [(ngModel)]="selectedSection" (change)="onFilterChange()">
+          <option value="">-- All --</option>
+          @for (sec of sectionList; track sec) {
+            <option [value]="sec">{{ sec }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group flex-grow-1">
+        <label class="form-label small text-muted mb-1">Employee</label>
+        <select class="form-select" [(ngModel)]="selectedEmpNo" (change)="onFilterChange()">
+          <option value="">-- All --</option>
+          @for (emp of empList; track emp.id) {
+            <option [value]="emp.empNo">{{ emp.empNo }} - {{ emp.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group flex-grow-1">
+        <label class="form-label small text-muted mb-1">Item No</label>
+        <select class="form-select" [(ngModel)]="selectedItemNo" (change)="onFilterChange()">
+          <option value="">-- All --</option>
+          @for (item of itemList; track item.itemNo) {
+            <option [value]="item.itemNo">{{ item.itemNo }} - {{ item.itemName }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <button class="btn btn-warning" (click)="clearFilters()">
+          <i class="fas fa-eraser me-1"></i> Clear
+        </button>
+      </div>
+    </div>
+  
+    <div class="card mb-4 shadow-sm border-0">
+      <div class="card-body">
+        <div style="height: 350px;">
+          <canvas id="empChart"></canvas>
+        </div>
+      </div>
+    </div>
+  
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 font-weight-bold text-primary">Employee Output Table</h5>
+        <span class="badge bg-secondary">Total: {{ reportData.length }} Employees</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+          <table class="table table-hover table-striped mb-0 text-center align-middle">
+            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+              <tr>
+                <th class="text-start px-4">#</th>
+                <th class="text-start">Emp No</th>
+                <th class="text-start">Name</th>
+                <th>Section</th>
+                <th class="text-end">Total Input</th>
+                <th class="text-end text-success">Total OK</th>
+                <th class="text-end text-danger">Total NG</th>
+                <th class="text-end px-4">% Yield (OK)</th>
+                <th class="text-center">Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (reportData.length === 0) {
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-muted">ไม่พบข้อมูลในช่วงเวลาที่เลือก</td>
+                </tr>
+              }
+              @for (row of reportData; track row.empNo; let i = $index) {
+                <tr>
+                  <td class="text-start px-4">{{ i + 1 }}</td>
+                  <td class="text-start fw-bold">{{ row.empNo }}</td>
+                  <td class="text-start">{{ row.name }}</td>
+                  <td>{{ row.section }}</td>
+                  <td class="text-end fw-bold">{{ row.totalInput | number }}</td>
+                  <td class="text-end text-success fw-bold">{{ row.totalOK | number }}</td>
+                  <td class="text-end text-danger fw-bold">{{ row.totalNG | number }}</td>
+                  <td class="text-end px-4">
+                    <span class="badge" [ngClass]="row.yieldPercent >= 95 ? 'bg-success' : (row.yieldPercent >= 80 ? 'bg-warning text-dark' : 'bg-danger')">
+                      {{ row.yieldPercent }} %
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-info btn-sm text-white" (click)="openEmpDetail(row)" title="ดูยอดแยกตาม Model">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-my-modal modalId="modalEmpDetail" title="รายละเอียดการ Sorting แยกตาม Model" modalSize="modal-lg">
+    @if (selectedEmpDetails) {
+      <div class="mb-3">
+        <h6 class="fw-bold text-primary">
+          <i class="fas fa-user-circle me-2"></i> 
+          พนักงาน: {{ selectedEmpDetails.empNo }} - {{ selectedEmpDetails.name }} ({{ selectedEmpDetails.section }})
+        </h6>
+      </div>
+  
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="text-start">Item No (Model)</th>
+              <th class="text-start">Item Name</th>
+              <th class="text-end">Input</th>
+              <th class="text-end text-success">OK</th>
+              <th class="text-end text-danger">NG</th>
+              <th class="text-end">% Yield</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of selectedEmpDetails.itemDetails; track item.itemNo) {
+              <tr>
+                <td class="text-start fw-bold">{{ item.itemNo }}</td>
+                <td class="text-start text-muted">{{ item.itemName }}</td>
+                <td class="text-end">{{ item.input | number }}</td>
+                <td class="text-end text-success">{{ item.ok | number }}</td>
+                <td class="text-end text-danger">{{ item.ng | number }}</td>
+                <td class="text-end">
+                    <span class="badge" 
+                          [ngClass]="item.yieldPercent >= 95 ? 'bg-success' : (item.yieldPercent >= 80 ? 'bg-warning text-dark' : 'bg-danger')"
+                          style="font-size: 0.85rem; padding: 0.4em 0.6em;">
+                      {{ item.yieldPercent }} %
+                    </span>
+                  </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot class="table-light fw-bold">
+            <tr>
+              <td colspan="2" class="text-end">ยอดรวมทั้งหมด:</td>
+              <td class="text-end text-primary">{{ selectedEmpDetails.totalInput | number }}</td>
+              <td class="text-end text-success">{{ selectedEmpDetails.totalOK | number }}</td>
+              <td class="text-end text-danger">{{ selectedEmpDetails.totalNG | number }}</td>
+              <td class="text-end">{{ selectedEmpDetails.yieldPercent }} %</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  </app-my-modal>

@@ -1,0 +1,109 @@
+<div class="mt-3">
+    <div class="card-header">Tool Master List</div>
+    <div class="card-body mt-3">
+      <button
+        class="btn btn-primary me-2"
+        data-bs-toggle="modal"
+        data-bs-target="#modalTool"
+        (click)="clearForm()"
+      >
+        <i class="fa fa-plus me-2"></i>Add New Tool
+      </button>
+      <button
+        class="btn btn-success me-2"
+        data-bs-toggle="modal"
+        data-bs-target="#modalExcel"
+      >
+        <i class="fa fa-upload me-2"></i>Add by Excel file
+      </button>
+      <button class="btn btn-success" (click)="downloadExcel()">
+        <i class="fa fa-download me-2"></i>Export to Excel
+      </button>
+  
+      <div class="form-inline mt-3">
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="ค้นหา Tool Name"
+            [(ngModel)]="searchToolName"
+            (keyup)="filterToolName()"
+          />
+          <div class="input-group-append">
+            <button class="btn btn-primary" (click)="filterToolName()">
+              <i class="fas fa-search fa-fw"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <table class="table table-bordered table-striped mt-3">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tool Name</th>
+            <th width="50px">แก้ไข</th>
+            <th width="50px">ลบ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of tools; track $index) {
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.toolName }}</td>
+            <td class="text-center">
+              <button
+                class="btn btn-primary"
+                (click)="edit(item)"
+                data-bs-toggle="modal"
+                data-bs-target="#modalTool"
+              >
+                <i class="fa fa-edit"></i>
+              </button>
+            </td>
+            <td class="text-center">
+              <button class="btn btn-danger" (click)="remove(item)">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <app-my-modal modalId="modalTool" title="Manage Tool">
+    <div>
+      <div class="mt-3">
+        <div>Tool Name</div>
+        <input
+          class="form-control"
+          type="text"
+          #toolNameInput 
+          [(ngModel)]="toolName"
+        />
+      </div>
+      
+      <button class="btn btn-primary mt-3 me-2" (click)="save()">
+        <i class="fa fa-check me-2"></i>บันทึกข้อมูล
+      </button>
+      <button class="btn btn-warning mt-3" (click)="clearForm()">
+        <i class="fa fa-close me-2"></i>ล้างแบบฟอร์ม
+      </button>
+    </div>
+  </app-my-modal>
+  
+  <app-my-modal modalId="modalExcel" title="Choose Excel file">
+    <div class="mt-3">
+      <input
+        type="file"
+        class="form-control"
+        id="excel"
+        (change)="fileSelected($event.target)"
+      />
+    </div>
+    <button class="btn btn-primary mt-3" (click)="uploadFile()">
+      <i class="fa fa-check me-2"></i>ยืนยัน
+    </button>
+  </app-my-modal>

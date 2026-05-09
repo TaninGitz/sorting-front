@@ -1,0 +1,119 @@
+<div class="mt-3">
+  <div class="card-header">Die Master List</div>
+  <div class="card-body mt-3">
+    <button
+      class="btn btn-primary me-2"
+      data-bs-toggle="modal"
+      data-bs-target="#modalDie"
+      (click)="clearForm()"
+    >
+      <i class="fa fa-plus me-2"></i>Add New Die List
+    </button>
+    <button
+      class="btn btn-success me-2"
+      data-bs-toggle="modal"
+      data-bs-target="#modalExcel"
+    >
+      <i class="fa fa-upload me-2"></i>Add by Excel file
+    </button>
+    <button class="btn btn-success me-2" (click)="downloadExcel()">
+      <i class="fa fa-download me-2"></i>Export to Excel
+    </button>
+    <div class="form-inline mt-3">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="ค้นหา Item No"
+          [(ngModel)]="searchItemNo"
+          (keyup)="filterItemNo()"
+        />
+        <div class="input-group-append">
+          <button class="btn btn-primary">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <table class="table table-bordered table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Item No</th>
+          <th>Die No</th>
+          <th width="50px">แก้ไข</th>
+          <th width="50px">ลบ</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of dies; track $index) {
+        <tr>
+          <td>{{ item.itemNo }}</td>
+          <td>{{ item.dieNo }}</td>
+          <td>
+            <button
+              class="btn btn-primary"
+              (click)="edit(item)"
+              data-bs-toggle="modal"
+              data-bs-target="#modalDie"
+            >
+              <i class="fa fa-edit"></i>
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-danger" (click)="remove(item)">
+              <i class="fa fa-times"></i>
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<app-my-modal modalId="modalDie" title="Add new Die list">
+  <div>
+    <div>Item No</div>
+    <form class="example-form">
+      <input
+        type="text"
+        placeholder="Search for an itemNo"
+        [formControl]="partControl"
+        [disabled]="isEditing"
+        [matAutocomplete]="auto"
+        class="form-control"
+        #nameInput
+        [(ngModel)]="itemNo"
+      />
+      <mat-autocomplete #auto="matAutocomplete">
+        @for (item of filteredPart | async; track item) {
+        <mat-option [value]="item.itemNo">{{ item.itemNo }}</mat-option>
+        }
+      </mat-autocomplete>
+    </form>
+    <div class="mt-3">
+      <div>Die No</div>
+      <input type="text" class="form-control" [(ngModel)]="dieNo" />
+    </div>
+    <button class="btn btn-primary mt-3 me-2" (click)="save()">
+      <i class="fa fa-check me-2"></i>เพิ่มข้อมูล Die No
+    </button>
+    <button class="btn btn-warning mt-3" (click)="clearForm()">
+      <i class="fa fa-undo me-2"></i>ล้างแบบฟอร์ม
+    </button>
+  </div>
+</app-my-modal>
+
+<app-my-modal modalId="modalExcel" title="Choose Excel file">
+  <div class="mt-3">
+    <input
+      type="file"
+      class="form-control"
+      id="excel"
+      (change)="fileSelected($event.target)"
+    />
+  </div>
+  <button class="btn btn-primary mt-3" (click)="uploadFile()">
+    <i class="fa fa-check me-2"></i>ยืนยัน
+  </button>
+</app-my-modal>

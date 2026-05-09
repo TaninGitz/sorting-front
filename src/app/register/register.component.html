@@ -1,0 +1,167 @@
+<div class="mt-3">
+  <div class="card-header">Register Page</div>
+  <div class="card-body mt-3">
+    <button
+      class="btn btn-primary me-2"
+      data-bs-toggle="modal"
+      data-bs-target="#modalRegister"
+      (click)="clearForm()"
+    >
+      <i class="fa fa-user-plus me-2"></i>Register Employee
+    </button>
+    <button
+      class="btn btn-success me-2"
+      data-bs-toggle="modal"
+      data-bs-target="#modalExcel"
+    >
+      <i class="fa fa-upload me-2"></i>Add by Excel file
+    </button>
+    <button class="btn btn-success" (click)="downloadExcel()">
+      <i class="fa fa-download me-2"></i>Export to Excel
+    </button>
+    <div class="form-inline mt-3">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="ค้นหารหัสพนักงาน"
+          [(ngModel)]="searchEmpNo"
+          (keyup)="filterEmpNo()"
+        />
+        <div class="input-group-append">
+          <button class="btn btn-primary" (click)="filterEmpNo()">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <table class="table table-bordered table-striped mt-3">
+      <thead>
+        <tr>
+          <th>รหัสพนักงาน</th>
+          <th>ชื่อ</th>
+          <th>RFID</th>
+          <th>ระดับ</th>
+          <th>ส่วนงาน</th>
+          <th width="50px">แก้ไข</th>
+          <th width="50px">ลบ</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of users; track $index) {
+        <tr>
+          <td>{{ item.empNo }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.rfid }}</td>
+          <td>{{ item.level }}</td>
+          <td>{{ item.section }}</td>
+          <td class="text-center">
+            <button
+              class="btn btn-primary"
+              (click)="edit(item)"
+              data-bs-target="#modalRegister"
+              data-bs-toggle="modal"
+            >
+              <i class="fa fa-edit"></i>
+            </button>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-danger" (click)="remove(item)">
+              <i class="fa fa-times"></i>
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<app-my-modal modalId="modalRegister" title="Register new Employee">
+  <div>
+    <div class="mt-3">
+      <div>ชื่อ</div>
+      <input class="form-control" [(ngModel)]="name" #nameInput tabindex="1" />
+    </div>
+    <div class="mt-3">
+      <div>รหัสพนักงาน</div>
+      <input
+        class="form-control"
+        [(ngModel)]="empNo"
+        maxlength="5"
+        tabindex="2"
+      />
+    </div>
+    <div class="mt-3">
+      <div>RFID</div>
+      <input
+        class="form-control"
+        [(ngModel)]="rfid"
+        name="rfid"
+        minlength="10 "
+        maxlength="10"
+        #rfidInput="ngModel"
+        autocomplete="off"
+        tabindex="3"
+      />
+      <div *ngIf="rfidInput.invalid && rfidInput.touched" class="text-danger">
+        error input
+      </div>
+    </div>
+    <div class="mt-3">
+      <div>รหัสผ่าน</div>
+      <input class="form-control" [(ngModel)]="password" tabindex="6" />
+    </div>
+    <div class="mt-3">
+      <div>ระดับ</div>
+      <select class="form-control" [(ngModel)]="level" tabindex="7">
+        <option value="">-- เลือกระดับ --</option>
+        <option value="Admin">Admin</option>
+        <option value="Staff">Staff</option>
+        <option value="Tech">Technician</option>
+        <option value="Operator">Operator</option>
+      </select>
+    </div>
+    <div class="mt-3">
+      <div>ส่วนงาน</div>
+      <select class="form-control" [(ngModel)]="section" tabindex="8">
+        <option value="">-- เลือกระดับ --</option>
+        <option value="PD STP">PD STP</option>
+        <option value="PD Visual">PD Visual</option>
+        <option value="PD 2nd">PD 2nd</option>
+        <!-- <option value="PD Anneal">PD Anneal</option>
+        <option value="PD Tap">PD Tap</option>
+        <option value="PD Weld">PD Weld</option>
+        <option value="PD Wash">PD Wash</option>
+        <option value="PD Blast">PD Blast</option>
+        <option value="PD RT Assy">PD RT Assy</option> -->
+        <option value="QC">QC</option>
+        <option value="DM">DM</option>
+        <option value="PC">PC</option>
+        <option value="MC">MC</option>
+        <option value="Eng">Eng</option>
+        <option value="ISO">ISO</option>
+      </select>
+    </div>
+    <button class="btn btn-primary mt-3 me-2" (click)="save()">
+      <i class="fa fa-check me-2"></i>ยืนยันการลงทะเบียน
+    </button>
+    <button class="btn btn-warning mt-3" (click)="clearForm()">
+      <i class="fa fa-close me-2"></i>ล้างแบบฟอร์ม
+    </button>
+  </div></app-my-modal
+>
+
+<app-my-modal modalId="modalExcel" title="Choose Excel file">
+  <div class="mt-3">
+    <input
+      type="file"
+      class="form-control"
+      id="excel"
+      (change)="fileSelected($event.target)"
+    />
+  </div>
+  <button class="btn btn-primary mt-3" (click)="uploadFile()">
+    <i class="fa fa-check me-2"></i>ยืนยัน
+  </button>
+</app-my-modal>

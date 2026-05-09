@@ -1,0 +1,42 @@
+.input-icon {
+    position: relative;
+    width: 100%;
+  }
+  
+  .input-icon input {
+    padding-left: 40px; /* เผื่อช่องให้กับไอคอนด้านซ้าย */
+  }
+  
+  .input-icon .icon {
+    position: absolute;
+    left: 10px; /* ไอคอนอยู่ชิดด้านซ้ายของ input */
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .input-icon .icon img {
+    width: 20px; /* กำหนดความกว้างของไอคอนให้พอดีกับ text box */
+    height: 20px; /* หรือจะใช้ height อื่นตามต้องการ */
+  }
+  .table-container {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+  
+  .table {
+    margin-bottom: 0;
+  }
+  
+  .table th {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .table td {
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+  }

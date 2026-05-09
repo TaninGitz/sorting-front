@@ -1,0 +1,147 @@
+<div class="mt-3">
+  <div class="card-header">Part Master List</div>
+  <div class="card-body mt-3">
+    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalPart" (click)="clearForm()">
+      <i class="fa fa-plus me-2"></i>Add New Part
+    </button>
+    <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#modalExcel">
+      <i class="fa fa-upload me-2"></i>Add by Excel file
+    </button>
+    <button class="btn btn-success me-2" (click)="downloadExcel()">
+      <i class="fa fa-download me-2"></i>Export to Excel
+    </button>
+    <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#modalExcelStandard">
+      <i class="fa fa-bolt me-2"></i>อัปโหลดเป้าหมาย (UPH)
+    </button>
+    <button class="btn btn-info me-2 text-white" (click)="downloadStandardExcel()">
+      <i class="fa fa-download me-2"></i>ดาวน์โหลด (UPH)
+    </button>
+    
+    <div class="form-inline mt-3">
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="ค้นหา Item No" [(ngModel)]="searchItemNo" (keyup)="filterItemtNo()" />
+        <div class="input-group-append">
+          <button class="btn btn-primary">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <table class="table table-bordered table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Item No</th>
+          <th>Item Name</th>
+          <th>Spec</th>
+          <th>Item Class</th>
+          <th>Max Qty</th>
+          <th width="80px" class="text-center">UPH</th>
+          <th width="50px" class="text-center">แก้ไข</th>
+          <th width="50px" class="text-center">ลบ</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of parts; track $index) {
+        <tr>
+          <td>{{ item.customer }}</td>
+          <td>{{ item.itemNo }}</td>
+          <td>{{ item.itemName }}</td>
+          <td>{{ item.spec }}</td>
+          <td>{{ item.itemClass }}</td>
+          <td>{{ item.maxQty }}</td>
+          <td class="text-center">
+            <button class="btn btn-info btn-sm text-white" data-bs-target="#modalStandard" data-bs-toggle="modal" (click)="manageStandard(item)" title="ตั้งค่า Output/Hour">
+              <i class="fa fa-cogs"></i>
+            </button>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-primary btn-sm" data-bs-target="#modalPart" data-bs-toggle="modal" (click)="edit(item)">
+              <i class="fa fa-edit"></i>
+            </button>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-danger btn-sm" (click)="remove(item)">
+              <i class="fa fa-times"></i>
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: เพิ่ม/แก้ไข Part -->
+<app-my-modal modalId="modalPart" title="Add new part">
+  <div>
+    <div class="mt-3">
+      <div>Customer</div>
+      <input type="text" class="form-control" #nameInput [(ngModel)]="customer" />
+    </div>
+    <div class="mt-3">
+      <div>Item No</div>
+      <input type="text" class="form-control" [(ngModel)]="itemNo" />
+    </div>
+    <div class="mt-3">
+      <div>Item Name</div>
+      <input type="text" class="form-control" [(ngModel)]="itemName" />
+    </div>
+    <div class="mt-3">
+      <div>Spec</div>
+      <input type="text" class="form-control" [(ngModel)]="spec" />
+    </div>
+    <div class="mt-3">
+      <div>Max Qty</div>
+      <input type="number" class="form-control" [(ngModel)]="maxQty" placeholder="ระบุจำนวนสูงสุด (ถ้ามี)" />
+    </div>
+    <div class="mt-3">
+      <div>Item Class</div>
+      <select class="form-control" [(ngModel)]="itemClass">
+        <option value="">-- เลือก Item Class --</option>
+        <option value="G">G</option>
+        <option value="S">S</option>
+        <option value="L">L</option>
+      </select>
+    </div>
+    <button class="btn btn-primary mt-3 me-2" (click)="save()">
+      <i class="fa fa-check me-2"></i>ยืนยันการเพิ่ม
+    </button>
+    <button class="btn btn-warning mt-3" (click)="clearForm()">
+      <i class="fa fa-close me-2"></i>ล้างแบบฟอร์ม
+    </button>
+  </div>
+</app-my-modal>
+
+<!-- Modal: อัปโหลด Excel -->
+<app-my-modal modalId="modalExcel" title="Choose Excel file">
+  <div class="mt-3">
+    <input type="file" class="form-control" id="excel" (change)="fileSelected($event.target)" />
+  </div>
+  <button class="btn btn-primary mt-3" (click)="uploadFile()">
+    <i class="fa fa-check me-2"></i>ยืนยัน
+  </button>
+</app-my-modal>
+
+<!-- ✅ Modal: จัดการ Standard (เรียกใช้ Component ลูก) -->
+<app-my-modal modalId="modalStandard" title="จัดการ Standard (UPH) : {{ currentPartItemNo }}" modalSize="modal-lg">
+  <!-- ส่งค่า itemNo ไปให้ component ลูกทำงานต่อ -->
+  <app-part-standard [itemNo]="currentPartItemNo"></app-part-standard>
+</app-my-modal>
+
+<!-- Modal: อัปโหลด Excel สำหรับ Standard UPH -->
+<app-my-modal modalId="modalExcelStandard" title="อัปโหลดไฟล์ Excel (ตั้งค่า UPH)">
+  <div class="mt-3">
+    <div class="alert alert-info small">
+      <b>รูปแบบไฟล์ Excel:</b><br>
+      Column A: ItemNo<br>
+      Column B: ToolID (ถ้าเป็น Default ให้ใส่ 0)<br>
+      Column C: Output/Hour
+    </div>
+    <input type="file" class="form-control" (change)="fileSelected($event.target)" />
+  </div>
+  <button class="btn btn-primary mt-3" (click)="uploadStandardExcel()">
+    <i class="fa fa-upload me-2"></i>ยืนยันอัปโหลด
+  </button>
+</app-my-modal>

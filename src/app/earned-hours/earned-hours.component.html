@@ -1,0 +1,83 @@
+<div class="mt-3">
+    <div class="card-header bg-primary text-white">
+      <i class="fa fa-clock me-2"></i>รายงานชั่วโมงการทำงานพนักงาน (Earned Hours)
+    </div>
+  
+    <div class="card-body mt-3">
+      <!-- Header Filter -->
+      <div class="row g-2 align-items-end bg-light p-3 rounded mb-3 border">
+        <div class="col-md-2">
+          <label>ตั้งแต่วันที่</label>
+          <input type="date" class="form-control" [(ngModel)]="fromDate" />
+        </div>
+        <div class="col-md-2">
+          <label>ถึงวันที่</label>
+          <input type="date" class="form-control" [(ngModel)]="toDate" />
+        </div>
+        <div class="col-md-2">
+          <label>รหัสพนักงาน</label>
+          <input type="text" class="form-control" placeholder="ดูทุกคน" [(ngModel)]="empNo" />
+        </div>
+        <div class="col-md-3">
+          <label>Item No / Item Name</label>
+          <input type="text" class="form-control" placeholder="ค้นหา Item..." [(ngModel)]="searchItem" />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-primary flex-grow-1" (click)="fetchData()">
+            <i class="fa fa-search me-1"></i>ค้นหา
+          </button>
+          <button class="btn btn-warning flex-grow-1" (click)="clearFilter()" title="ล้างการค้นหา">
+            <i class="fa fa-eraser me-1"></i>ล้าง
+          </button>
+        </div>
+      </div>
+  
+      <!-- Summary Box -->
+      <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span><strong>ผลลัพธ์การค้นหา:</strong> พบข้อมูล {{ reports.length }} รายการ</span>
+        <span class="fs-5"><strong>รวมชั่วโมงการทำงาน (Earned Hours):</strong> <span class="text-danger">{{ grandTotalHours | number:'1.2-2' }}</span> ชั่วโมง</span>
+      </div>
+  
+      <!-- Data Table -->
+      <!-- ✅ เพิ่มคลาส custom-scroll ตรงนี้ -->
+      <div class="table-responsive custom-scroll">
+        <table class="table table-bordered table-striped table-hover mt-2 mb-0">
+          <!-- ✅ เพิ่มคลาส sticky-header ตรงนี้ -->
+          <thead class="table-dark text-center sticky-header">
+            <tr>
+              <th>วันที่</th>
+              <th>รหัสพนักงาน</th>
+              <th>ชื่อพนักงาน</th>
+              <th>Item No</th>
+              <th>อุปกรณ์ (Tool)</th>
+              <th class="text-end">งานที่ทำได้ (ชิ้น)</th>
+              <th class="text-end">Target (pcs/hr)</th>
+              <th class="text-end bg-warning text-dark">ชั่วโมงที่ได้ (Hrs)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of reports; track $index) {
+            <tr>
+              <td class="text-center">{{ row.date }}</td>
+              <td class="text-center">{{ row.empNo }}</td>
+              <td>{{ row.empName }}</td>
+              <td>
+                <strong>{{ row.itemNo }}</strong><br>
+                <small class="text-muted">{{ row.itemName }}</small>
+              </td>
+              <td class="text-center">{{ row.toolName }}</td>
+              <td class="text-end fw-bold text-success">{{ row.totalInput | number }}</td>
+              <td class="text-end">{{ row.uph | number }}</td>
+              <td class="text-end fw-bold text-danger bg-light">{{ row.earnedHours | number:'1.2-2' }}</td>
+            </tr>
+            }
+            @if (reports.length === 0) {
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">ไม่พบข้อมูล กรุณาปรับเงื่อนไขการค้นหา</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>

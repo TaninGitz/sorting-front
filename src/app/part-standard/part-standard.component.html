@@ -1,0 +1,48 @@
+<div class="row g-2 align-items-end mb-3">
+    <div class="col-md-5">
+      <label>อุปกรณ์ที่ใช้ (Tool)</label>
+      <select class="form-control" [(ngModel)]="stdToolId">
+        <option [ngValue]="null">-- ทุกอุปกรณ์ (Default) --</option>
+        @for (t of tools; track t.id) {
+          <option [value]="t.id">{{ t.toolName }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-5">
+      <label>เป้าหมาย Output / Hour</label>
+      <input type="number" class="form-control" [(ngModel)]="stdOutputPerHour" placeholder="ระบุจำนวนชิ้น/ชม." min="1">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary w-100" (click)="saveStandard()">
+        <i class="fa fa-plus me-2"></i>เพิ่ม
+      </button>
+    </div>
+  </div>
+  
+  <table class="table table-bordered mt-3">
+    <thead class="table-light">
+      <tr>
+        <th>อุปกรณ์ (Tool)</th>
+        <th class="text-end">Standard Output / Hour</th>
+        <th width="80" class="text-center">ลบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (std of standards; track std.id) {
+        <tr>
+          <td>{{ std.tool?.toolName || 'Default (ใช้ได้กับทุกอุปกรณ์)' }}</td>
+          <td class="text-end text-success fw-bold">{{ std.stdOutputPerHour | number }} ชิ้น/ชม.</td>
+          <td class="text-center">
+            <button class="btn btn-danger btn-sm" (click)="removeStandard(std.id)">
+              <i class="fa fa-times"></i>
+            </button>
+          </td>
+        </tr>
+      }
+      @if (standards.length === 0) {
+        <tr>
+          <td colspan="3" class="text-center text-muted py-3">ยังไม่มีการตั้งค่าเป้าหมาย UPH สำหรับ Part นี้</td>
+        </tr>
+      }
+    </tbody>
+  </table>
